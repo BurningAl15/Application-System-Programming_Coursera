@@ -27,6 +27,8 @@ public class AsteraX : MonoBehaviour
     
 	public delegate void CallbackDelegateV3(Vector3 v); // Set up a Vector3 delegate type.
 
+    // [SerializeField] private ParticleSystem _particleSystem;
+    
     // System.Flags changes how eGameStates are viewed in the Inspector and lets multiple 
     //  values be selected simultaneously (similar to how Physics Layers are selected).
     // It's only valid for the game to ever be in one state, but I've added System.Flags
@@ -283,7 +285,7 @@ public class AsteraX : MonoBehaviour
     /// <returns>The respawn point for the PlayerShip.</returns>
     /// <param name="prevPos">Previous position of the PlayerShip.</param>
     /// <param name="callback">Method to be called when this method is finished.</param>
-    static public IEnumerator FindRespawnPointCoroutine(Vector3 prevPos, CallbackDelegateV3 callback)
+    static public IEnumerator FindRespawnPointCoroutine(Vector3 prevPos, CallbackDelegateV3 callback,ParticleSystem _particleSystem)
     {
 # if DEBUG_AsteraX_RespawnNotifications
         Debug.Log("AsteraX:FindRespawnPointCoroutine( "+prevPos+", [CallbackDelegateV3] )");
@@ -309,7 +311,7 @@ public class AsteraX : MonoBehaviour
                 }
             }
         }
-
+        
 # if DEBUG_AsteraX_RespawnNotifications
         Debug.Log("AsteraX:FindRespawnPointCoroutine() yielding for "+PlayerShip.RESPAWN_DELAY+" seconds.");
 #endif
@@ -372,11 +374,15 @@ public class AsteraX : MonoBehaviour
             }
         }
 
+        _particleSystem.gameObject.transform.position = nextPos;
+        _particleSystem.Play();
+        
         // Spawn particle effect for appearing
         //Instantiate(S.respawnAppearParticlesPrefab, nextPos, Quaternion.identity);
 
         // Give the particle effect just a bit of time before the ship respawns
-        yield return new WaitForSeconds(PlayerShip.RESPAWN_DELAY * 0.2f);
+        yield return new WaitUntil(()=>!_particleSystem.IsAlive());
+        // yield return new WaitForSeconds(PlayerShip.RESPAWN_DELAY * .05f);
 
 # if DEBUG_AsteraX_RespawnNotifications
         Debug.Log("AsteraX:FindRespawnPointCoroutine() calling back!");

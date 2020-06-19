@@ -3,8 +3,9 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -19,6 +20,9 @@ MonoBehaviour:
   numSmallerAsteroidsToSpawn: 2
   pointsForAsteroidSize: 0000000090010000c800000064000000
   asteroidPrefabs:
-  - {fileID: 1029653053436338, guid: 1293b0763d7d344e0b908c097078ac09, type: 2}
-  - {fileID: 1669921439223048, guid: 5513cde93bb3343768ced35921a9c3c2, type: 2}
-  - {fileID: 1317570492134680, guid: a6d3ccfc58a1f41368479aabb6050561, type: 2}
+  - {fileID: 1029653053436338, guid: 1293b0763d7d344e0b908c097078ac09, type: 3}
+  - {fileID: 1669921439223048, guid: 5513cde93bb3343768ced35921a9c3c2, type: 3}
+  - {fileID: 1317570492134680, guid: a6d3ccfc58a1f41368479aabb6050561, type: 3}
+  asteroidParticles:
+  - {fileID: 6220110877294356580, guid: 453297137a0a2674cbf1173757b035fa, type: 3}
+  - {fileID: 0}

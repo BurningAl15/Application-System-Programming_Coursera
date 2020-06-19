@@ -41,6 +41,9 @@ public class PlayerShip : MonoBehaviour
 
     Rigidbody           rigid;
 
+    [SerializeField] private ParticleSystem _particleSystem;
+    [SerializeField] private ParticleSystem _teleportParticleSystem;
+    
 
     void Awake()
     {
@@ -50,9 +53,20 @@ public class PlayerShip : MonoBehaviour
         
         // NOTE: We don't need to check whether or not rigid is null because of [RequireComponent()] above
         rigid = GetComponent<Rigidbody>();
+        SetEmission(0);
+        _teleportParticleSystem.Stop();
     }
 
-
+    private int currentParticleEmission = 0;
+    private bool isMoving = false;
+    
+    void SetEmission(int emissionPower)
+    {
+        var emission = _particleSystem.emission;
+        currentParticleEmission = emissionPower;
+        emission.rateOverTime = currentParticleEmission;
+    }
+    
     void Update()
     {
         // Using Horizontal and Vertical axes to set velocity
@@ -62,8 +76,18 @@ public class PlayerShip : MonoBehaviour
         Vector3 vel = new Vector3(aX, aY);
         if (vel.magnitude > 1)
         {
+            if (!isMoving)
+            {
+                SetEmission(50);
+                isMoving = true;
+            }
             // Avoid speed multiplying by 1.414 when moving at a diagonal
             vel.Normalize();
+        }
+        else if (vel.magnitude == 0 && isMoving)
+        {
+            SetEmission(0);
+            isMoving = false;
         }
 
         rigid.velocity = vel * shipSpeed;
@@ -117,7 +141,7 @@ public class PlayerShip : MonoBehaviour
 #if DEBUG_PlayerShip_RespawnNotifications
         Debug.Log("PlayerShip:Respawn()");
 #endif
-        StartCoroutine(AsteraX.FindRespawnPointCoroutine(transform.position, RespawnCallback)); 
+        StartCoroutine(AsteraX.FindRespawnPointCoroutine(transform.position, RespawnCallback,_teleportParticleSystem)); 
 
         // Initially, I had made the gameObject inactive, but this caused the 
         //  coroutine called above to never return from yield!

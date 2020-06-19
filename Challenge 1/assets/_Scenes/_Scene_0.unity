@@ -932,7 +932,7 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2
+      scalar: 3
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -1423,8 +1423,8 @@ ParticleSystem:
   ShapeModule:
     serializedVersion: 6
     enabled: 1
-    type: 8
-    angle: 15.31423
+    type: 4
+    angle: 16.753408
     length: 0.525133
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
@@ -1629,7 +1629,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 50
+      scalar: 0
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -3390,7 +3390,7 @@ ParticleSystem:
     strength:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 2
+      scalar: 0.5
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -5663,6 +5663,8 @@ MonoBehaviour:
     type: 3}
   respawnDelay: 2
   startingJumps: 3
+  _particleSystem: {fileID: 989396506}
+  _teleportParticleSystem: {fileID: 3415767834972319272}
 --- !u!114 &1199415305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6456,6 +6458,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 453297137a0a2674cbf1173757b035fa, type: 3}
+--- !u!198 &3415767834972319272 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 1647871885286850754, guid: b5d00b3395d5bd24fbf985a34b6fbc23,
+    type: 3}
+  m_PrefabInstance: {fileID: 4159448090423242474}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4159448090423242474
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6468,15 +6476,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: Teletransport
       objectReference: {fileID: 0}
+    - target: {fileID: 1647871885286850754, guid: b5d00b3395d5bd24fbf985a34b6fbc23,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.scalar
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1647871885286850754, guid: b5d00b3395d5bd24fbf985a34b6fbc23,
+        type: 3}
+      propertyPath: startDelay.scalar
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 1667424106693548165, guid: b5d00b3395d5bd24fbf985a34b6fbc23,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 17.6
       objectReference: {fileID: 0}
     - target: {fileID: 1667424106693548165, guid: b5d00b3395d5bd24fbf985a34b6fbc23,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.964
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1667424106693548165, guid: b5d00b3395d5bd24fbf985a34b6fbc23,
         type: 3}
