@@ -24,5 +24,5 @@ MonoBehaviour:
   - {fileID: 1669921439223048, guid: 5513cde93bb3343768ced35921a9c3c2, type: 3}
   - {fileID: 1317570492134680, guid: a6d3ccfc58a1f41368479aabb6050561, type: 3}
   asteroidParticles:
-  - {fileID: 6220110877294356580, guid: 453297137a0a2674cbf1173757b035fa, type: 3}
-  - {fileID: 0}
+  - {fileID: 9164268222896955118, guid: 46c0c49df1c24584ebe0e3cbc2d53014, type: 3}
+  - {fileID: 2508026224771723405, guid: e7e429551337b2a4a80a5181a63ef243, type: 3}

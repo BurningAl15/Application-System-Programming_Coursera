@@ -285,7 +285,7 @@ public class AsteraX : MonoBehaviour
     /// <returns>The respawn point for the PlayerShip.</returns>
     /// <param name="prevPos">Previous position of the PlayerShip.</param>
     /// <param name="callback">Method to be called when this method is finished.</param>
-    static public IEnumerator FindRespawnPointCoroutine(Vector3 prevPos, CallbackDelegateV3 callback,ParticleSystem _particleSystem)
+    static public IEnumerator FindRespawnPointCoroutine(Vector3 prevPos, CallbackDelegateV3 callback,ParticleManager _particleSystem)
     {
 # if DEBUG_AsteraX_RespawnNotifications
         Debug.Log("AsteraX:FindRespawnPointCoroutine( "+prevPos+", [CallbackDelegateV3] )");
@@ -375,13 +375,13 @@ public class AsteraX : MonoBehaviour
         }
 
         _particleSystem.gameObject.transform.position = nextPos;
-        _particleSystem.Play();
+        _particleSystem.ParticlesPlay();
         
         // Spawn particle effect for appearing
         //Instantiate(S.respawnAppearParticlesPrefab, nextPos, Quaternion.identity);
 
         // Give the particle effect just a bit of time before the ship respawns
-        yield return new WaitUntil(()=>!_particleSystem.IsAlive());
+        yield return new WaitUntil(()=>!_particleSystem.IsParticleSystemAlive);
         // yield return new WaitForSeconds(PlayerShip.RESPAWN_DELAY * .05f);
 
 # if DEBUG_AsteraX_RespawnNotifications

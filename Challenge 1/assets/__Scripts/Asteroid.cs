@@ -18,6 +18,8 @@ public class Asteroid : MonoBehaviour
     public int          size = 3;
     public bool         immune = false;
 
+    public static int checkSize;
+    
     Rigidbody           rigid; // protected
     OffScreenWrapper    offScreenWrapper;
 
@@ -30,6 +32,7 @@ public class Asteroid : MonoBehaviour
     {
         rigid = GetComponent<Rigidbody>();
         offScreenWrapper = GetComponent<OffScreenWrapper>();
+        checkSize = size;
     }
 
     // Use this for initialization
@@ -210,6 +213,9 @@ public class Asteroid : MonoBehaviour
                     children[i].transform.SetParent(null, true);
                     children[i].InitAsteroidParent();
                 }
+
+                GameObject currentParticles = Instantiate(AsteraX.AsteroidsSO.GetAsteroidParticles(checkSize));
+                currentParticles.transform.position = this.transform.position;
             }
 
             Destroy(gameObject);

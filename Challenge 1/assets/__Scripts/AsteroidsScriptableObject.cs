@@ -28,8 +28,16 @@ public class AsteroidsScriptableObject : ScriptableObject
     public GameObject GetAsteroidPrefab()
     {
         int ndx = Random.Range(0, asteroidPrefabs.Length);
+        
         return asteroidPrefabs[ndx];
-        // Instantiate(asteroidParticles)
+    }
+
+    public GameObject GetAsteroidParticles(int _size)
+    {
+        if (_size <= 3)
+            return asteroidParticles[0];
+        else
+            return asteroidParticles[1];
     }
         
 }

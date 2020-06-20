@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityStandardAssets.CrossPlatformInput;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -42,8 +43,9 @@ public class PlayerShip : MonoBehaviour
     Rigidbody           rigid;
 
     [SerializeField] private ParticleSystem _particleSystem;
-    [SerializeField] private ParticleSystem _teleportParticleSystem;
-    
+    // [SerializeField] private ParticleSystem _teleportParticleSystem;
+    [FormerlySerializedAs("_teleportParticleSystem")] [SerializeField] private ParticleManager _teleportDissapearParticleSystem;
+    [SerializeField] private ParticleManager _teleportAppearParticleSystem;
 
     void Awake()
     {
@@ -54,7 +56,8 @@ public class PlayerShip : MonoBehaviour
         // NOTE: We don't need to check whether or not rigid is null because of [RequireComponent()] above
         rigid = GetComponent<Rigidbody>();
         SetEmission(0);
-        _teleportParticleSystem.Stop();
+        _teleportDissapearParticleSystem.ParticleStop();
+        _teleportAppearParticleSystem.ParticleStop();
     }
 
     private int currentParticleEmission = 0;
@@ -76,15 +79,19 @@ public class PlayerShip : MonoBehaviour
         Vector3 vel = new Vector3(aX, aY);
         if (vel.magnitude > 1)
         {
+            // Avoid speed multiplying by 1.414 when moving at a diagonal
+            vel.Normalize();
+        }
+
+        if (vel.magnitude > 0.05f)
+        {
             if (!isMoving)
             {
                 SetEmission(50);
                 isMoving = true;
             }
-            // Avoid speed multiplying by 1.414 when moving at a diagonal
-            vel.Normalize();
         }
-        else if (vel.magnitude == 0 && isMoving)
+        else if (vel.magnitude <= .05f && isMoving)
         {
             SetEmission(0);
             isMoving = false;
@@ -120,6 +127,9 @@ public class PlayerShip : MonoBehaviour
             return;
         }
 
+        _teleportDissapearParticleSystem.transform.position = collision.transform.position;
+        _teleportDissapearParticleSystem.ParticlesPlay();
+
         if (Time.time < LAST_COLLISION + COLLISION_DELAY) {
             return;
         } else {
@@ -141,7 +151,7 @@ public class PlayerShip : MonoBehaviour
 #if DEBUG_PlayerShip_RespawnNotifications
         Debug.Log("PlayerShip:Respawn()");
 #endif
-        StartCoroutine(AsteraX.FindRespawnPointCoroutine(transform.position, RespawnCallback,_teleportParticleSystem)); 
+        StartCoroutine(AsteraX.FindRespawnPointCoroutine(transform.position, RespawnCallback,_teleportAppearParticleSystem)); 
 
         // Initially, I had made the gameObject inactive, but this caused the 
         //  coroutine called above to never return from yield!
