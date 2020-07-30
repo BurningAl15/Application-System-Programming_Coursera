@@ -190,10 +190,19 @@ public class Asteroid : MonoBehaviour
 
         if (otherGO.tag == "Bullet" || otherGO.transform.root.gameObject.tag == "Player")
         {
+            Bullet bull = otherGO.GetComponent<Bullet>();
             if (otherGO.tag == "Bullet")
             {
                 Destroy(otherGO);
                 AsteraX.AddScore(AsteraX.AsteroidsSO.pointsForAsteroidSize[size]);
+                
+                AchievementManager.AchievementStep(Achievement.eStepType.hitAsteroid, 1);
+                
+                if (bull.bDidWrap) {
+                    // Because the second parameter (num) defaults to 1, there's 
+                    //  no need to pass it in.
+                    AchievementManager.AchievementStep(Achievement.eStepType.luckyShot);
+                }
             }
 
             if (size > 1)
