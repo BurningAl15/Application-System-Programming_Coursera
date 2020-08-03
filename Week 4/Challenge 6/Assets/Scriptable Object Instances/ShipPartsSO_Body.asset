@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f2ec51c92f41cf47bba7392d1bb3990, type: 3}
+  m_Name: ShipPartsSO_Body
+  m_EditorClassIdentifier: 
+  type: 0
+  partInfos:
+  - name: Basic
+    prefab: {fileID: 1472542294352466, guid: 2a4573fd70efa094d84f72d5723ef9a6, type: 2}
+  - name: Hexed
+    prefab: {fileID: 1347799718326292, guid: a96ad7905a5794a119fc82f075c53d81, type: 2}
+  - name: Spiker
+    prefab: {fileID: 1479205242234512, guid: 095f6770c7dea47a985126995fcce71f, type: 2}
+  - name: Ring
+    prefab: {fileID: 1938124355550624, guid: 0345fef261298453baac93b577b502c1, type: 2}
