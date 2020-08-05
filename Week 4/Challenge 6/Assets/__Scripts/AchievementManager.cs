@@ -112,6 +112,9 @@ public class AchievementManager : MonoBehaviour
                         // The result is true if the Achievement was newly completed
                         AnnounceAchievementCompletion(ach);
 
+                        //Tell Unity Analytics that the achievement has been completed
+                        CustomAnalytics.SendAchievementUnlocked(ach);
+                        
                         // Also save the game any time we complete an Achievement
                         SaveGameManager.Save();
                     }

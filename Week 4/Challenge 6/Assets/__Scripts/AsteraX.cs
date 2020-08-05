@@ -9,25 +9,25 @@ using UnityEngine.Events;
 public class AsteraX : MonoBehaviour
 {
     // Private Singleton-style instance. Accessed by static property S later in script
-    static private AsteraX _S;
-    static public List<LevelInfo>   LEVEL_LIST;
-    static List<Asteroid>           ASTEROIDS;
-    static List<Bullet>             BULLETS;
-    static private bool             _PAUSED = false;
-    static private eGameState       _GAME_STATE = eGameState.mainMenu;
-    static public bool              GOT_HIGH_SCORE = false;
+    private static AsteraX _S;
+    public static List<LevelInfo>   LEVEL_LIST;
+    private static List<Asteroid>           ASTEROIDS;
+    private static List<Bullet>             BULLETS;
+    private static bool             _PAUSED = false;
+    private static eGameState       _GAME_STATE = eGameState.mainMenu;
+    public static bool              GOT_HIGH_SCORE = false;
     
 	// If you use a fully-qualified class name like this, you don't need "using UnityEngine.UI;" above.
-    static UnityEngine.UI.Text  	SCORE_GT;
+    private static UnityEngine.UI.Text  	SCORE_GT;
     // This is an automatic property
     public static int           	SCORE { get; private set; }
-    
-    const float MIN_ASTEROID_DIST_FROM_PLAYER_SHIP = 5;
-    const float DELAY_BEFORE_RELOADING_SCENE = 4;
+
+    private const float MIN_ASTEROID_DIST_FROM_PLAYER_SHIP = 5;
+    private const float DELAY_BEFORE_RELOADING_SCENE = 4;
 
 	public delegate void CallbackDelegate(); // Set up a generic delegate type.
-    static public event CallbackDelegate GAME_STATE_CHANGE_DELEGATE;
-    static public event CallbackDelegate PAUSED_CHANGE_DELEGATE;
+    public static event CallbackDelegate GAME_STATE_CHANGE_DELEGATE;
+    public static event CallbackDelegate PAUSED_CHANGE_DELEGATE;
     
 	public delegate void CallbackDelegateV3(Vector3 v); // Set up a Vector3 delegate type.
 
@@ -111,26 +111,29 @@ public class AsteraX : MonoBehaviour
         PauseGame(_paused);
     }
 
-    void GameStateChanged() {
-        this._gameState = AsteraX.GAME_STATE;
+    private void GameStateChanged() {
+        _gameState = GAME_STATE;
     }
 
-    void PauseChanged() {
-        this._paused = AsteraX.PAUSED;
+    private void PauseChanged() {
+        _paused = PAUSED;
     }
 
     private void OnDestroy()
     {
         GAME_STATE_CHANGE_DELEGATE -= GameStateChanged;
         PAUSED_CHANGE_DELEGATE -= PauseChanged;
-        AsteraX.GAME_STATE = AsteraX.eGameState.none;
+        GAME_STATE = eGameState.none;
     }
 
-    void Start()
+    private void Start()
     {
 #if DEBUG_AsteraX_LogMethods
         Debug.Log("AsteraX:Start()");
 #endif
+		
+		//Register RemoteSettingsUpdated() to be called whenever RemoteSettings is updated
+        RemoteSettings.Updated += RemoteSettingsUpdated;
 		
 		ParseLevelProgression();
 
@@ -141,7 +144,7 @@ public class AsteraX : MonoBehaviour
     }
 
 
-    void StartLevel(int levelNum)
+    private void StartLevel(int levelNum)
     {
 #if DEBUG_AsteraX_LogMethods
         Debug.Log("AsteraX:StartLevel("+levelNum+")");
@@ -151,37 +154,28 @@ public class AsteraX : MonoBehaviour
             Debug.LogError("AsteraX:StartLevel(" + levelNum + ") - LEVEL_LIST is empty!");
             return;
         }
-        if (levelNum >= LEVEL_LIST.Count)
-        {
-            levelNum = 1; // Just loop the levels for now. In a real game, this would be different.
-        }
+        if (levelNum >= LEVEL_LIST.Count) levelNum = 1; // Just loop the levels for now. In a real game, this would be different.
 
         GAME_STATE = eGameState.preLevel;
         GAME_LEVEL = levelNum;
-        LevelInfo info = LEVEL_LIST[levelNum - 1];
+        var info = LEVEL_LIST[levelNum - 1];
 
         // Destroy any remaining Asteroids, Bullets, etc. (including particle effects)
         ClearAsteroids();
         ClearBullets();
-        foreach (GameObject go in GameObject.FindGameObjectsWithTag("DestroyWithLevelChange"))
-        {
-            Destroy(go);
-        }
+        foreach (var go in GameObject.FindGameObjectsWithTag("DestroyWithLevelChange")) Destroy(go);
 
         // Set up the asteroidsSO
         asteroidsSO.numSmallerAsteroidsToSpawn = info.numSubAsteroids;
         
         // Spawn the parent Asteroids, child Asteroids are taken care of by them
-        for (int i = 0; i < info.numInitialAsteroids; i++)
-        {
-            SpawnParentAsteroid(i);
-        }
+        for (var i = 0; i < info.numInitialAsteroids; i++) SpawnParentAsteroid(i);
 
+        CustomAnalytics.SendLevelStart(GAME_LEVEL);
         AchievementManager.AchievementStep(Achievement.eStepType.levelUp, levelNum);
-
     }
 
-    void EndLevel()
+    private void EndLevel()
     {
 #if DEBUG_AsteraX_LogMethods
         Debug.Log("AsteraX:EndLevel()");
@@ -195,7 +189,7 @@ public class AsteraX : MonoBehaviour
         }
     }
 
-    void LevelAdvanceDisplayCallback()
+    private void LevelAdvanceDisplayCallback()
     {
 #if DEBUG_AsteraX_LogMethods
         Debug.Log("AsteraX:LevelAdvanceDisplayCallback()");
@@ -203,7 +197,7 @@ public class AsteraX : MonoBehaviour
         StartLevel(GAME_LEVEL);
     }
 
-    void LevelAdvanceIdleCallback()
+    private void LevelAdvanceIdleCallback()
     {
 #if DEBUG_AsteraX_LogMethods
         Debug.Log("AsteraX:LevelAdvanceIdleCallback()");
@@ -213,13 +207,13 @@ public class AsteraX : MonoBehaviour
         PauseGame(false); // unpause the game
     }
 
-    void SpawnParentAsteroid(int i)
+    private void SpawnParentAsteroid(int i)
     {
 #if DEBUG_AsteraX_LogMethods
         Debug.Log("AsteraX:SpawnParentAsteroid("+i+")");
 #endif
 
-        Asteroid ast = Asteroid.SpawnAsteroid();
+        var ast = Asteroid.SpawnAsteroid();
         ast.gameObject.name = "Asteroid_" + i.ToString("00");
         // Find a good location for the Asteroid to spawn
         Vector3 pos;
@@ -232,7 +226,7 @@ public class AsteraX : MonoBehaviour
         ast.size = asteroidsSO.initialSize;
     }
 
-    void ClearAsteroids()
+    private void ClearAsteroids()
     {
         // Some Asteroids in ASTEROIDS are children of others, so we should de-parent them
         //  before destroying their parents. Because Asteroids were added with parents
@@ -241,7 +235,7 @@ public class AsteraX : MonoBehaviour
         //  as Asteroids removed themselves from the ASTEROIDS list, but due to GAME_STATE
         //  protections in RemoveAsteroid(), we don't have that problem.
         Asteroid ast;
-        for (int i = ASTEROIDS.Count - 1; i >= 0; i--)
+        for (var i = ASTEROIDS.Count - 1; i >= 0; i--)
         {
             ast = ASTEROIDS[i];
             ast.transform.SetParent(null); // De-parent the Asteroid
@@ -253,22 +247,16 @@ public class AsteraX : MonoBehaviour
         ASTEROIDS.Clear();
     }
 
-    void ClearBullets()
+    private void ClearBullets()
     {
-        if (BULLETS == null)
-        {
-            return;
-        }
+        if (BULLETS == null) return;
         // Bullets are much simpler to clear than Asteroids because there are no parent-child dependencies
         // Because Bullet.OnDestroy() will in turn call AsteraX.RemoveBullet(), we need to work backwards through BULLETS
-        for (int i = BULLETS.Count - 1; i >= 0; i--)
-        {
-            Destroy(BULLETS[i].gameObject);
-        }
+        for (var i = BULLETS.Count - 1; i >= 0; i--) Destroy(BULLETS[i].gameObject);
     }
 
 
-    void ParseLevelProgression()
+    private void ParseLevelProgression()
     {
         // This takes the information from levelProgression and puts it into LEVEL_LIST;
         LEVEL_LIST = new List<LevelInfo>();
@@ -278,12 +266,12 @@ public class AsteraX : MonoBehaviour
         //  it's not worth it to worry too much about performance or memory.
         // NOTE: There is little protection here for bad data in the levelProgression field. In 
         //  an actual production environment, you would absolutely need to add more protection.
-        string[] levelStrings = levelProgression.Split(',');
-        for (int i = 0; i < levelStrings.Length; i++)
+        var levelStrings = levelProgression.Split(',');
+        for (var i = 0; i < levelStrings.Length; i++)
         {
-            string[] levelBits = levelStrings[i].Split(':');
-            string levelName = "Level " + levelBits[0];
-            string[] asteroidStrings = levelBits[1].Split('/');
+            var levelBits = levelStrings[i].Split(':');
+            var levelName = "Level " + levelBits[0];
+            var asteroidStrings = levelBits[1].Split('/');
             int numInitialAsteroids, numSubAsteroids;
             if (!int.TryParse(asteroidStrings[0], out numInitialAsteroids)
                 || !int.TryParse(asteroidStrings[1], out numSubAsteroids))
@@ -293,12 +281,29 @@ public class AsteraX : MonoBehaviour
                 return; // This is throwing an error anyway, so we'll exit the method.
             }
             // We should have good data now
-            LevelInfo levelInfo = new LevelInfo(i + 1, levelName, numInitialAsteroids, numSubAsteroids);
+            var levelInfo = new LevelInfo(i + 1, levelName, numInitialAsteroids, numSubAsteroids);
             LEVEL_LIST.Add(levelInfo);
         }
         Debug.Log("AsteraX:ParseLevelProgression() - Parsed levelProgression:\n" + levelProgression);
     }
 
+    void RemoteSettingsUpdated()
+    {
+        string newLevelProgression = RemoteSettings.GetString("levelProgression", "");
+        if (newLevelProgression != "")
+        {
+            levelProgression = newLevelProgression;
+            Debug.Log("Asterax:RemoteSettingsUpdated() - Calling ParseLevelProgression() "+
+                      "with levelProgression:\n"+levelProgression);
+            ParseLevelProgression();
+        }
+        else
+        {
+            Debug.Log("Asterax:RemoteSettingsUpdated() - Did not receive proper "+
+                      "levelProgression from RemoteSettings.");
+        }
+    }
+    
     public void PauseGameToggle()
     {
         PauseGame(!PAUSED);
@@ -308,26 +313,17 @@ public class AsteraX : MonoBehaviour
     {
         PAUSED = toPaused;
         if (PAUSED)
-        {
             Time.timeScale = 0;
-        }
         else
-        {
             Time.timeScale = 1;
-        }
     }
 
 
     private void Update()
     {
         if (GAME_STATE == eGameState.level && ASTEROIDS.Count == 0)
-        {
-            // The player has destroyed all the Asteroids and completed this level
-            if (_S != null)
-            {
-                _S.EndLevel();
-            }
-        }
+        // The player has destroyed all the Asteroids and completed this level
+            if (_S != null) _S.EndLevel();
     }
     
     
@@ -336,9 +332,9 @@ public class AsteraX : MonoBehaviour
         GAME_STATE = eGameState.gameOver;
         Invoke("ReloadScene", DELAY_BEFORE_RELOADING_SCENE);
     }
-    
 
-    void ReloadScene()
+
+    private void ReloadScene()
     {
         // Reload the scene to restart the game
         // Note: This exposes a long-time Unity bug where reloading the scene 
@@ -352,35 +348,24 @@ public class AsteraX : MonoBehaviour
 
 
 
-    static public void AddAsteroid(Asteroid asteroid)
+    public static void AddAsteroid(Asteroid asteroid)
     {
-        if (ASTEROIDS.IndexOf(asteroid) == -1)
-        {
-            ASTEROIDS.Add(asteroid);
-        }
+        if (ASTEROIDS.IndexOf(asteroid) == -1) ASTEROIDS.Add(asteroid);
     }
-    static public void RemoveAsteroid(Asteroid asteroid)
+    public static void RemoveAsteroid(Asteroid asteroid)
     {
         if (GAME_STATE != eGameState.level)
-        {
-            // If this is not in the middle of a level, don't do anything. RemoveAsteroid is called
-            //  by Asteroid:OnDestroy(), so this prevents removal from happening if the game is in
-            //  any state other than level, which avoids modifying the ASTEROIDS List in the for 
-            //  loop of ClearAsteroids().
+        // If this is not in the middle of a level, don't do anything. RemoveAsteroid is called
+        //  by Asteroid:OnDestroy(), so this prevents removal from happening if the game is in
+        //  any state other than level, which avoids modifying the ASTEROIDS List in the for 
+        //  loop of ClearAsteroids().
             return;
-        }
-        if (ASTEROIDS.IndexOf(asteroid) != -1)
-        {
-            ASTEROIDS.Remove(asteroid);
-        }
+        if (ASTEROIDS.IndexOf(asteroid) != -1) ASTEROIDS.Remove(asteroid);
     }
 
-    static public void AddBullet(Bullet bullet)
+    public static void AddBullet(Bullet bullet)
     {
-        if (BULLETS == null)
-        {
-            BULLETS = new List<Bullet>();
-        }
+        if (BULLETS == null) BULLETS = new List<Bullet>();
         if (BULLETS.IndexOf(bullet) == -1)
         {
             BULLETS.Add(bullet);
@@ -390,12 +375,9 @@ public class AsteraX : MonoBehaviour
         }
     }
 
-    static public void RemoveBullet(Bullet bullet)
+    public static void RemoveBullet(Bullet bullet)
     {
-        if (BULLETS == null)
-        {
-            return;
-        }
+        if (BULLETS == null) return;
         BULLETS.Remove(bullet);
     }
 
@@ -411,7 +393,7 @@ public class AsteraX : MonoBehaviour
     /// a breakpoint in the set clause and then look at the call stack if you fear that 
     /// something random is setting your _S value.</para>
     /// </summary>
-    static private AsteraX S
+    private static AsteraX S
     {
         get
         {
@@ -424,33 +406,24 @@ public class AsteraX : MonoBehaviour
         }
         set
         {
-            if (_S != null)
-            {
-                Debug.LogError("AsteraX:S setter - Attempt to set S when it has already been set.");
-            }
+            if (_S != null) Debug.LogError("AsteraX:S setter - Attempt to set S when it has already been set.");
             _S = value;
         }
     }
 
 
-    static public AsteroidsScriptableObject AsteroidsSO
+    public static AsteroidsScriptableObject AsteroidsSO
     {
         get
         {
-            if (S != null)
-            {
-                return S.asteroidsSO;
-            }
+            if (S != null) return S.asteroidsSO;
             return null;
         }
     }
 
-    static public bool PAUSED
+    public static bool PAUSED
     {
-        get
-        {
-            return _PAUSED;
-        }
+        get => _PAUSED;
         private set
         {
             if (value != _PAUSED)
@@ -461,21 +434,15 @@ public class AsteraX : MonoBehaviour
                 //  assigned to it. In that case, it is null and will throw a null reference
                 //  exception if you try to call it. So *any* time you call a delegate, you 
                 //  should check beforehand to make sure it's not null.
-                if (PAUSED_CHANGE_DELEGATE != null)
-                {
-                    PAUSED_CHANGE_DELEGATE();
-                }
+                if (PAUSED_CHANGE_DELEGATE != null) PAUSED_CHANGE_DELEGATE();
             }
 
         }
     }
 
-    static public eGameState GAME_STATE
+    public static eGameState GAME_STATE
     {
-        get
-        {
-            return _GAME_STATE;
-        }
+        get => _GAME_STATE;
         set
         {
             if (value != _GAME_STATE)
@@ -486,32 +453,31 @@ public class AsteraX : MonoBehaviour
                 //  assigned to it. In that case, it is null and will throw a null reference
                 //  exception if you try to call it. So *any* time you call a delegate, you 
                 //  should check beforehand to make sure it's not null.
-                if (GAME_STATE_CHANGE_DELEGATE != null)
-                {
-                    GAME_STATE_CHANGE_DELEGATE();
-                }
+                if (GAME_STATE_CHANGE_DELEGATE != null) GAME_STATE_CHANGE_DELEGATE();
             }
         }
     }
 
     // This is called an automatic property. It allows protection of a static field and automatically
     //  generates a static field that it reads and writes.
-    static public int GAME_LEVEL
+    public static int GAME_LEVEL
     {
         get; private set;
     }
 
-    static public void StartGame()
+    public static void StartGame()
     {
         GOT_HIGH_SCORE = false;
         GAME_LEVEL = 0;
         _S.EndLevel();
     }
 
-    static public void GameOver()
+    public static void GameOver()
     {
         SaveGameManager.CheckHighScore(SCORE);
         SaveGameManager.Save();
+        CustomAnalytics.SendFinalShipPartChoice();
+        CustomAnalytics.SendGameOver();
         _S.EndGame();
     }
 
@@ -534,28 +500,25 @@ public class AsteraX : MonoBehaviour
     }
 
 
-    static public LevelInfo GetLevelInfo(int lNum = -1)
+    public static LevelInfo GetLevelInfo(int lNum = -1)
     {
-        if (lNum == -1)
-        {
-            lNum = GAME_LEVEL;
-        }
+        if (lNum == -1) lNum = GAME_LEVEL;
         // lNum is 1-based where LEVEL_LIST is 0-based, so LEVEL_LIST[0] is lNum 1
         if (lNum < 1 || lNum > LEVEL_LIST.Count)
         {
             Debug.LogError("AsteraX:GetLevelInfo() - Requested level number of " + lNum + " does not exist.");
             return new LevelInfo(-1, "NULL", 1, 1);
         }
-        return (LEVEL_LIST[lNum - 1]);
+        return LEVEL_LIST[lNum - 1];
     }
 
     
-	static public void AddScore(int num)
+	public static void AddScore(int num)
     {
         // Find the ScoreGT Text field only once.
         if (SCORE_GT == null)
         {
-            GameObject go = GameObject.Find("ScoreGT");
+            var go = GameObject.Find("ScoreGT");
             if (go != null)
             {
                 SCORE_GT = go.GetComponent<UnityEngine.UI.Text>();
@@ -585,9 +548,9 @@ public class AsteraX : MonoBehaviour
     }
 
 
-    const int RESPAWN_DIVISIONS = 8;
-    const int RESPAWN_AVOID_EDGES = 2; // Note: This number must be greater than 0!
-    static Vector3[,] RESPAWN_POINTS;
+    private const int RESPAWN_DIVISIONS = 8;
+    private const int RESPAWN_AVOID_EDGES = 2; // Note: This number must be greater than 0!
+    private static Vector3[,] RESPAWN_POINTS;
     /// <summary>
     /// <para>Given the point of the PlayerShip when it hit an Asteroid, this method
     /// chooses a respawn point. The RESPAWN_POINT_GRID_DIVISIONS above determines
@@ -604,7 +567,7 @@ public class AsteraX : MonoBehaviour
     /// <returns>The respawn point for the PlayerShip.</returns>
     /// <param name="prevPos">Previous position of the PlayerShip.</param>
     /// <param name="callback">Method to be called when this method is finished.</param>
-    static public IEnumerator FindRespawnPointCoroutine(Vector3 prevPos, CallbackDelegateV3 callback)
+    public static IEnumerator FindRespawnPointCoroutine(Vector3 prevPos, CallbackDelegateV3 callback)
     {
 # if DEBUG_AsteraX_RespawnNotifications
         Debug.Log("AsteraX:FindRespawnPointCoroutine( "+prevPos+", [CallbackDelegateV3] )");
@@ -616,19 +579,15 @@ public class AsteraX : MonoBehaviour
         if (RESPAWN_POINTS == null)
         {
             RESPAWN_POINTS = new Vector3[RESPAWN_DIVISIONS + 1, RESPAWN_DIVISIONS + 1];
-            Bounds playAreaBounds = ScreenBounds.BOUNDS;
-            float dX = playAreaBounds.size.x / RESPAWN_DIVISIONS;
-            float dY = playAreaBounds.size.y / RESPAWN_DIVISIONS;
-            for (int i = 0; i <= RESPAWN_DIVISIONS; i++)
-            {
-                for (int j = 0; j <= RESPAWN_DIVISIONS; j++)
-                {
-                    RESPAWN_POINTS[i, j] = new Vector3(
-                        playAreaBounds.min.x + i * dX,
-                        playAreaBounds.min.y + j * dY,
-                        0);
-                }
-            }
+            var playAreaBounds = ScreenBounds.BOUNDS;
+            var dX = playAreaBounds.size.x / RESPAWN_DIVISIONS;
+            var dY = playAreaBounds.size.y / RESPAWN_DIVISIONS;
+            for (var i = 0; i <= RESPAWN_DIVISIONS; i++)
+            for (var j = 0; j <= RESPAWN_DIVISIONS; j++)
+                RESPAWN_POINTS[i, j] = new Vector3(
+                    playAreaBounds.min.x + i * dX,
+                    playAreaBounds.min.y + j * dY,
+                    0);
         }
 
 # if DEBUG_AsteraX_RespawnNotifications
@@ -646,50 +605,40 @@ public class AsteraX : MonoBehaviour
         int prevI = 0, prevJ = 0;
 
         // Check points against prevPos (avoiding edges of space)
-        for (int i = RESPAWN_AVOID_EDGES; i <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; i++)
+        for (var i = RESPAWN_AVOID_EDGES; i <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; i++)
+        for (var j = RESPAWN_AVOID_EDGES; j <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; j++)
         {
-            for (int j = RESPAWN_AVOID_EDGES; j <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; j++)
+            // sqrMagnitude avoids doing a needless (and costly) square root operation
+            distSqr = (RESPAWN_POINTS[i, j] - prevPos).sqrMagnitude;
+            if (distSqr < closestDistSqr)
             {
-                // sqrMagnitude avoids doing a needless (and costly) square root operation
-                distSqr = (RESPAWN_POINTS[i, j] - prevPos).sqrMagnitude;
-                if (distSqr < closestDistSqr)
-                {
-                    closestDistSqr = distSqr;
-                    prevI = i;
-                    prevJ = j;
-                }
+                closestDistSqr = distSqr;
+                prevI = i;
+                prevJ = j;
             }
         }
 
         float furthestDistSqr = 0;
-        Vector3 nextPos = prevPos;
+        var nextPos = prevPos;
         // Now, iterate through each of the RESPAWN_POINTS to find the one with 
         //  the largest distance to the closest Asteroid (again avoid edges of space)
-        for (int i = RESPAWN_AVOID_EDGES; i <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; i++)
+        for (var i = RESPAWN_AVOID_EDGES; i <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; i++)
+        for (var j = RESPAWN_AVOID_EDGES; j <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; j++)
         {
-            for (int j = RESPAWN_AVOID_EDGES; j <= RESPAWN_DIVISIONS - RESPAWN_AVOID_EDGES; j++)
+            if (i == prevI && j == prevJ) continue;
+            closestDistSqr = float.MaxValue;
+            // Find distance to the closest Asteroid
+            for (var k = 0; k < ASTEROIDS.Count; k++)
             {
-                if (i == prevI && j == prevJ)
-                {
-                    continue;
-                }
-                closestDistSqr = float.MaxValue;
-                // Find distance to the closest Asteroid
-                for (int k = 0; k < ASTEROIDS.Count; k++)
-                {
-                    distSqr = (ASTEROIDS[k].transform.position - RESPAWN_POINTS[i, j]).sqrMagnitude;
-                    if (distSqr < closestDistSqr)
-                    {
-                        closestDistSqr = distSqr;
-                    }
-                }
+                distSqr = (ASTEROIDS[k].transform.position - RESPAWN_POINTS[i, j]).sqrMagnitude;
+                if (distSqr < closestDistSqr) closestDistSqr = distSqr;
+            }
 
-                // If this is further than before, this is the best spawn loc
-                if (closestDistSqr > furthestDistSqr)
-                {
-                    furthestDistSqr = closestDistSqr;
-                    nextPos = RESPAWN_POINTS[i, j];
-                }
+            // If this is further than before, this is the best spawn loc
+            if (closestDistSqr > furthestDistSqr)
+            {
+                furthestDistSqr = closestDistSqr;
+                nextPos = RESPAWN_POINTS[i, j];
             }
         }
 
