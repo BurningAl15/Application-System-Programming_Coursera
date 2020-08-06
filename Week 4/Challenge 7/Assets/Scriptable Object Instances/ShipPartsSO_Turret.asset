@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f2ec51c92f41cf47bba7392d1bb3990, type: 3}
+  m_Name: ShipPartsSO_Turret
+  m_EditorClassIdentifier: 
+  type: 1
+  partInfos:
+  - name: Basic
+    prefab: {fileID: 1058964074447046, guid: 8e30bba7ea392274bb56e88c8ba8f11f, type: 2}
+  - name: Blaster
+    prefab: {fileID: 1302078508834978, guid: f493144b595684db28261f187ec7a91d, type: 2}
+  - name: Chain Gun
+    prefab: {fileID: 1692645853596478, guid: c82813788dace4f3db85043080284fee, type: 2}
+  - name: Turbo Laser
+    prefab: {fileID: 1353267872351220, guid: 80ea39e2d62c745a5ba9cf6d35dbfaa8, type: 2}
